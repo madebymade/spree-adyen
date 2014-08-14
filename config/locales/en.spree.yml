@@ -1,0 +1,6 @@
+en:
+  spree:
+    api_username: "Api Username"
+    api_password: "Api Password"
+    merchant_account: "Merchant Account"
+    public_key: "Public key"
