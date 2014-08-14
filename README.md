@@ -14,6 +14,10 @@ And then execute:
 
     $ bundle
 
+To use 3d secure within your payment authorisation process you will need to use a forked version of the Adyen gem.
+
+    gem 'adyen', github: 'huoxito/adyen', branch: '3D-Secure-support'
+
 Copy the adyen notification migration. You'll need it to save all notifications
 responses.
 
