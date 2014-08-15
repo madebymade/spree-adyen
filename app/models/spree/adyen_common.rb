@@ -43,7 +43,7 @@ module Spree
         if response.success?
           def response.authorization; psp_reference; end
           def response.avs_result; {}; end
-          def response.cvv_result; {}; end
+          def response.cvv_result; { 'code' => 'Authorised' }; end
         else
           # TODO confirm the error response will always have these two methods
           def response.to_s
@@ -116,10 +116,10 @@ module Spree
               accept_header: payment.request_env['HTTP_ACCEPT'],
               user_agent: payment.request_env['HTTP_USER_AGENT']
             },
-            recurring: true
+            recurring: false
           }
         else
-          { recurring: true }
+          { recurring: false }
         end
       end
 
@@ -196,7 +196,7 @@ module Spree
         end
 
         def create_profile_on_card(payment, card)
-          unless payment.source.gateway_customer_profile_id.present?
+          if payment.source.gateway_customer_profile_id.blank? and payment.response_code.blank?
 
             shopper = { :reference => (payment.order.user_id.present? ? payment.order.user_id : payment.order.email),
                         :email => payment.order.email,
@@ -206,15 +206,19 @@ module Spree
             amount = build_amount_on_profile_creation payment
             options = build_authorise_details payment
 
-            response = provider.authorise_payment payment.order.number, amount, shopper, card, options
+            merchant_reference = "#{payment.order.number}-#{payment.identifier}"
+
+            response = provider.authorise_payment merchant_reference, amount, shopper, card, options
 
             if response.success?
-              fetch_and_update_contract payment.source, shopper[:reference]
+              # fetch_and_update_contract payment.source, shopper[:reference]
 
               # Avoid this payment from being processed and so authorised again
               # once the order transitions to complete state.
               # See Spree::Order::Checkout for transition events
-              payment.started_processing!
+              payment.update_columns response_code: response.psp_reference
+              # payment.started_processing!
+
 
             elsif response.respond_to?(:enrolled_3d?) && response.enrolled_3d?
               raise Adyen::Enrolled3DError.new(response, payment.payment_method)
@@ -233,9 +237,7 @@ module Spree
           # need to reach the api again to grab the token
           list = provider.list_recurring_details(shopper_reference)
 
-          unless list.details.present?
-            raise RecurringDetailsNotFoundError
-          end
+          raise RecurringDetailsNotFoundError unless list.details.present?
 
           source.update_columns(
             month: list.details.last[:card][:expiry_date].month,
