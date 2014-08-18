@@ -1,6 +1,11 @@
 en:
   spree:
+    adyen:
+      hpp_link: "Pay with Adyen"
+      hpp_message: "You'll be redirected to Adyen Hosted Payment Pages. After completing the payment form you'll be back to the store."
     api_username: "Api Username"
     api_password: "Api Password"
     merchant_account: "Merchant Account"
     public_key: "Public key"
+    shared_secret: "Shared secret"
+    skin_code: "Skin code"

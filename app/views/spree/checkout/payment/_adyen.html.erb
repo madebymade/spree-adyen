@@ -1,23 +1,22 @@
 <p>
-  You'll be redirected to Adyen Hosted Payment Pages. After completing the
-  payment form you'll be back to the store.
+  <%= Spree.t(:hpp_message, scope: 'spree.adyen') %>
 </p>
 
 <% redirect_params = {
-        :currency_code => current_currency,
-        # :merchantReturnData => payment_method.id,
-        :ship_before_date => Date.tomorrow,
-        :session_validity => 10.minutes.from_now,
-        :recurring => false,
-        :merchant_reference => "#{@order.number}",
-        :merchant_account => payment_method.merchant_account,
-        :skin_code => payment_method.skin_code,
-        :shared_secret => payment_method.shared_secret,
-        :payment_amount => (@order.total.to_f * 100).to_int
+    :currency_code => current_currency,
+    # :merchantReturnData => payment_method.id,
+    :ship_before_date => Date.tomorrow,
+    :session_validity => 10.minutes.from_now,
+    :recurring => false,
+    :merchant_reference => "#{@order.number}",
+    :merchant_account => payment_method.merchant_account,
+    :skin_code => payment_method.skin_code,
+    :shared_secret => payment_method.shared_secret,
+    :payment_amount => (@order.total.to_f * 100).to_int
   }
 %>
 
-<%= link_to "Pay with Adyen", ::Adyen::Form.redirect_url(
+<%= link_to Spree.t(:hpp_link, scope: 'spree.adyen'), ::Adyen::Form.redirect_url(
       Rails.env.development? ? redirect_params.merge(:resURL => adyen_confirmation_url) : redirect_params
   )
 %>
