@@ -1,5 +1,5 @@
 <p>
-  <%= Spree.t(:hpp_message, scope: 'spree.adyen') %>
+  <%= Spree.t(:hpp_message, scope: :adyen) %>
 </p>
 
 <% redirect_params = {
@@ -16,7 +16,7 @@
   }
 %>
 
-<%= link_to Spree.t(:hpp_link, scope: 'spree.adyen'), ::Adyen::Form.redirect_url(
+<%= link_to Spree.t(:hpp_link, scope: :adyen), ::Adyen::Form.redirect_url(
       Rails.env.development? ? redirect_params.merge(:resURL => adyen_confirmation_url) : redirect_params
   )
 %>
