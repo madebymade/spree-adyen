@@ -1,6 +1,7 @@
 en:
   spree:
     adyen:
+      checkout_now_with_paypal: "Checkout now with PayPal"
       hpp_link: "Pay with Adyen"
       hpp_message: "You'll be redirected to Adyen Hosted Payment Pages. After completing the payment form you'll be back to the store."
     api_username: "Api Username"

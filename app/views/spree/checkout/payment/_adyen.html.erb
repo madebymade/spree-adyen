@@ -3,23 +3,27 @@
 </p>
 
 <% redirect_params = {
-    :currency_code => current_currency,
+    currency_code: current_currency,
     # :merchantReturnData => payment_method.id,
-    :ship_before_date => Date.tomorrow,
-    :session_validity => 10.minutes.from_now,
-    :recurring => false,
-    :merchant_reference => @order.number.to_s,
-    :merchant_account => payment_method.merchant_account,
-    :skin_code => payment_method.skin_code,
-    :shared_secret => payment_method.shared_secret,
-    :payment_amount => (@order.total.to_f * 100).to_int
+    ship_before_date: Date.tomorrow,
+    session_validity: 10.minutes.from_now,
+    recurring: false,
+    merchant_reference: @order.number.to_s,
+    merchant_account: payment_method.merchant_account,
+    skin_code: payment_method.skin_code,
+    shared_secret: payment_method.shared_secret,
+    payment_amount: (@order.total.to_f * 100).to_i
   }
 %>
 
-<%= link_to Spree.t(:hpp_link, scope: :adyen), ::Adyen::Form.redirect_url(
-      Rails.env.development? ? redirect_params.merge(:resURL => adyen_confirmation_url) : redirect_params
-  )
-%>
+<% if payment_method.paypal_only
+    redirect_params.merge!{brand_code: 'paypal'}
+  end %>
+
+
+<%= link_to ::Adyen::Form.redirect_url(Rails.env.development? ? redirect_params.merge(:resURL => adyen_confirmation_url) : redirect_params) do %>
+  <%= if payment_method.paypal_only ? image_tag(image_path('paypal-checkout-now.png'), alt: Spree.t(:checkout_now_with_paypal, scope: :adyen)) : Spree.t(:hpp_link, scope: :adyen) %>
+<% end %>
 
 <script type="text/javascript">
 $(function() {

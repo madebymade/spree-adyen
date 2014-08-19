@@ -5,6 +5,15 @@ module Spree
 
     preference :skin_code, :string
     preference :shared_secret, :string
+    preference :paypal_only, :boolean, default: false
+
+    after_save :set_adyen_form_action
+
+    def set_adyen_form_action
+      action = preferred_paypal_only ? :details : :select
+
+      ::Adyen.configuration.payment_flow = action
+    end
 
     def source_required?
       false
