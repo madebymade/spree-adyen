@@ -23,6 +23,10 @@ module Spree
 
       order.next
 
+      payment.complete
+
+      order.update!
+
       if order.complete?
         flash.notice = Spree.t(:order_processed_successfully)
         redirect_to order_path(order, :token => order.guest_token)
