@@ -14,6 +14,7 @@ module Spree
       initializer "spree-adyen.assets.precompile", :group => :all do |app|
         app.config.assets.precompile += %w[
           adyen.encrypt.js
+          paypal-checkout-now.png
         ]
       end
     end
