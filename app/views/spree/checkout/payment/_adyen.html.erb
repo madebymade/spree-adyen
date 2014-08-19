@@ -16,14 +16,14 @@
   }
 %>
 
-<% if payment_method.paypal_only
+<% if payment_method.preferred_paypal_only
     redirect_params.merge!(brand_code: 'paypal')
   end
 %>
 
 
 <%= link_to ::Adyen::Form.redirect_url(Rails.env.development? ? redirect_params.merge(:resURL => adyen_confirmation_url) : redirect_params) do %>
-  <% if payment_method.paypal_only %>
+  <% if payment_method.preferred_paypal_only %>
     <%= image_tag(image_path('paypal-checkout-now.png'), alt: Spree.t(:checkout_now_with_paypal, scope: :adyen)) %>
   <% else %>
     <%=Spree.t(:hpp_link, scope: :adyen) %>
