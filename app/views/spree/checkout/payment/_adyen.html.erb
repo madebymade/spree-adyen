@@ -17,7 +17,7 @@
 %>
 
 <% if payment_method.paypal_only
-    redirect_params.merge!{brand_code: 'paypal'}
+    redirect_params.merge!(brand_code: 'paypal')
   end
 %>
 
