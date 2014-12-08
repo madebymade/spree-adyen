@@ -59,6 +59,5 @@ module Spree
       end
       response
     end
-
   end
 end
