@@ -18,7 +18,7 @@ module Spree
 
     def authorize(amount, source, gateway_options = {})
       card = { encrypted: { json: source.encrypted_data } }
-      authorize_on_card(amount, source, gateway_options, card)
+      authorize_on_card(amount, source, gateway_options, card, gateway_options[:save_profile])
     end
   end
 end

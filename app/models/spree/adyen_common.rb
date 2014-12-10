@@ -80,9 +80,7 @@ module Spree
       if response.success?
         def response.authorization; psp_reference; end
       else
-        def response.to_s
-          refusal_reason
-        end
+        def response.to_s; refusal_reason; end
       end
 
       response
@@ -135,7 +133,7 @@ module Spree
 
     private
 
-    def authorize_on_card(amount, source, gateway_options, card, options = { recurring: false })
+    def authorize_on_card(amount, source, gateway_options, card, recurring = false)
       reference = gateway_options[:order_id]
 
       amount = { currency: gateway_options[:currency], value: amount }
@@ -151,10 +149,10 @@ module Spree
                   :ip => gateway_options[:ip],
                   :statement => "Order # #{gateway_options[:order_id]}" }
 
-      response = decide_and_authorise(reference, amount, shopper, source, card, options)
+      response = decide_and_authorise(reference, amount, shopper, source, card, recurring)
 
       if response.success?
-        if payment_profiles_supported?
+        if payment_profiles_supported? && recurring
           fetch_and_update_contract(response, source, shopper[:reference])
         end
 
@@ -170,12 +168,12 @@ module Spree
       response
     end
 
-    def decide_and_authorise(reference, amount, shopper, source, card, options)
+    def decide_and_authorise(reference, amount, shopper, source, card, recurring = false)
       recurring_detail_reference = source.gateway_customer_profile_id
       card_cvc = source.verification_value
 
       if card_cvc.blank? && require_one_click_payment?(source, shopper)
-        raise Core::GatewayError.new("You need to enter the card verificationv value")
+        raise Core::GatewayError.new("You need to enter the card verification value")
       end
 
       if require_one_click_payment?(source, shopper) && recurring_detail_reference.present?
@@ -183,14 +181,15 @@ module Spree
       elsif source.gateway_customer_profile_id.present?
         provider.authorise_recurring_payment(reference, amount, shopper, source.gateway_customer_profile_id)
       else
-        provider.authorise_payment(reference, amount, shopper, card, options)
+        provider.authorise_payment(reference, amount, shopper, card, recurring)
       end
     end
 
     def fetch_and_update_contract(response, source, shopper_reference)
       if source.last_digits.blank?
         last_digits = response.additional_data["cardSummary"]
-        if last_digits.blank? && payment_profiles_supported?
+
+        if last_digits.blank?
           note = "Payment was authorized but could not fetch last digits.
                   Please request last digits to be sent back to support payment profiles"
           raise MissingCardSummaryError, note
