@@ -153,7 +153,19 @@ module Spree
 
       if response.success?
         if payment_profiles_supported? && recurring
-          fetch_and_update_contract(response, source, shopper[:reference])
+          if source.last_digits.blank?
+            last_digits = response.additional_data["cardSummary"]
+
+            if last_digits.blank?
+              note = "Payment was authorized but could not fetch last digits.
+                      Please request last digits to be sent back to support payment profiles"
+              raise MissingCardSummaryError, note
+            end
+
+            source.update!(last_digits: last_digits)
+          end
+
+          delay.fetch_and_update_contract(response, source, shopper[:reference])
         end
 
         def response.authorization; psp_reference; end
@@ -186,18 +198,6 @@ module Spree
     end
 
     def fetch_and_update_contract(response, source, shopper_reference)
-      if source.last_digits.blank?
-        last_digits = response.additional_data["cardSummary"]
-
-        if last_digits.blank?
-          note = "Payment was authorized but could not fetch last digits.
-                  Please request last digits to be sent back to support payment profiles"
-          raise MissingCardSummaryError, note
-        end
-
-        source.last_digits = last_digits
-      end
-
       list = provider.list_recurring_details(shopper_reference)
 
       raise RecurringDetailsNotFoundError unless list.details.present?
